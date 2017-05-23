@@ -1,0 +1,59 @@
+# Fail2ban overrides
+# Author: David Egan
+# YOU MUST SET YOUR IGNOREIP(SEE X.X.X.X) AND `destemail`
+# These rules override `/etc/fail2ban/jail.conf`.
+# For reference see:
+# =============================================================
+
+[DEFAULT]
+# Ban hosts for one hour:
+bantime = 3600
+
+# Override /etc/fail2ban/jail.d/00-firewalld.conf:
+banaction = iptables-multiport
+
+# Emails
+destemail = serveradmin@example.com
+sendername = Fail2Ban_XXXXX
+mta = mail
+
+# Action
+action = %(action_mwl)s
+
+# Clean IP list
+ignoreip = 127.0.0.1/8 X.X.X.X
+#ignoreip = 127.0.0.1/8
+
+# ============================================================
+# Jails Enabled
+# ============================================================
+
+# sshd jail is already enabled by default, so this isn't strictly necessary
+[sshd]
+enabled = true
+
+[ssh]
+
+enabled  = true
+port     = 2540
+filter   = sshd
+logpath  = /var/log/auth.log
+maxretry = 6
+
+# Jail for those trying user-enumeration or other overtly malicious acts
+[wordpress-hard]
+enabled = true
+filter = wordpress-hard
+bantime  = 36000
+logpath = /var/log/auth.log
+maxretry = 1
+port = http,https
+
+# Jail with more lee-way for users who have entered wrong login credentials
+[wordpress-soft]
+enabled = true
+filter = wordpress-soft
+bantime  = 36000
+logpath = /var/log/auth.log
+maxretry = 3
+port = http,https
